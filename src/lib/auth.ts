@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { User } from "@/models/User";
 import { dbConnect } from "./db";
 import bcrypt from "bcryptjs";
+import { getToken } from "next-auth/jwt";
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -55,11 +56,19 @@ export const authOptions: NextAuthOptions = {
 
       if (!existingUser) {
         // New user → create in DB
+
+        console.log("New user");
+        console.log(user.image);
+
         await User.create({
           name: user.name,
           email: user.email,
           provider: account?.provider,
+          provider_id: user.id || null,
+          image: user.image || null,
         });
+
+        // Allow login
         return true;
       }
 
@@ -81,7 +90,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  pages: {
-    signIn: "/auth/login",
-  },
+  // pages: {
+  //   signIn: "/auth/login",
+  // },
 };
