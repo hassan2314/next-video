@@ -16,6 +16,7 @@ if (!cached) {
 
 export async function dbConnect() {
   if (cached.conn) {
+    console.log("Using existing database connection");
     return cached.conn;
   }
 
@@ -26,6 +27,7 @@ export async function dbConnect() {
   }
   try {
     cached.conn = await cached.promise;
+    console.log("New database connection created");
   } catch (error) {
     cached.promise = null;
     console.log(error);
