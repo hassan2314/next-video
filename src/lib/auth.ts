@@ -14,6 +14,41 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_ID!,
       clientSecret: process.env.GOOGLE_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+      profile(profile) {
+        try {
+          dbConnect();
+          const existingUser: any = User.findOne({ email: profile.email });
+          if (existingUser.email === profile.email) {
+            return {
+              id: profile.sub,
+              name: profile.name,
+              email: profile.email,
+              image: profile.picture,
+            };
+          }
+          User.create({
+            name: profile.name,
+            email: profile.email,
+            password: "password",
+          });
+          return {
+            id: profile.sub,
+            name: profile.name,
+            email: profile.email,
+            image: profile.picture,
+          };
+        } catch (error) {
+          console.log(error);
+          throw new Error("Something went wrong", { cause: error });
+        }
+      },
     }),
     CredentialsProvider({
       name: "Credentials",
