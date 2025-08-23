@@ -6,6 +6,11 @@ export interface IVideo {
   description: string;
   video: string;
   thumbnail: string;
+  transforation?: {
+    width: number;
+    height: number;
+    quality: number;
+  };
   controls?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -32,6 +37,17 @@ const videoSchema = new Schema<IVideo>(
     controls: {
       type: Boolean,
       default: true,
+    },
+    transforation: {
+      width: {
+        type: Number,
+      },
+      height: {
+        type: Number,
+      },
+      quality: {
+        type: Number,
+      },
     },
   },
   {
