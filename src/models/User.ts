@@ -5,6 +5,8 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password?: string;
+  provider_id?: string;
+  image?: string;
   provider: "credentials" | "google" | "github";
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -19,6 +21,8 @@ const UserSchema = new Schema<IUser>(
       enum: ["credentials", "google", "github"],
       default: "credentials",
     },
+    provider_id: { type: String },
+    image: { type: String },
   },
   { timestamps: true }
 );
