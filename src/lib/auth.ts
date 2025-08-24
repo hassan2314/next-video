@@ -57,9 +57,6 @@ export const authOptions: NextAuthOptions = {
       if (!existingUser) {
         // New user → create in DB
 
-        console.log("New user");
-        console.log(user.image);
-
         await User.create({
           name: user.name,
           email: user.email,
