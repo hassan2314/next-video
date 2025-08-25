@@ -7,9 +7,7 @@ import {
   ImageKitUploadNetworkError,
   upload,
 } from "@imagekit/next";
-import { Video } from "lucide-react";
-import { useRef, useState } from "react";
-
+import { useState } from "react";
 interface VideoUploadProps {
   onSuccess: (response: any) => void;
   onProgress?: (progress: number) => void;
