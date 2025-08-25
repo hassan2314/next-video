@@ -33,7 +33,7 @@ const ForgotPasswordPage = () => {
         setMessage("Password reset link has been sent to your email.");
         setTimeout(() => {
           router.push("/reset-password");
-        });
+        }, 5000);
       }
     } catch (err) {
       setError("Failed to send reset link. Try again later.");

@@ -7,6 +7,8 @@ export interface IUser extends Document {
   password?: string;
   provider_id?: string;
   image?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpire?: Date;
   provider: "credentials" | "google" | "github";
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -23,6 +25,8 @@ const UserSchema = new Schema<IUser>(
     },
     provider_id: { type: String },
     image: { type: String },
+    resetPasswordToken: { type: String },
+    resetPasswordExpire: { type: Date },
   },
   { timestamps: true }
 );
