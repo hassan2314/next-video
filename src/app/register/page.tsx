@@ -1,16 +1,43 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
 
 const Page = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [debouncedEmail, setDebouncedEmail] = useState(email);
+
+  // --- Debounce email input (500ms) ---
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedEmail(email), 500);
+    return () => clearTimeout(handler);
+  }, [email]);
+
+  // --- React Query mutation for registration ---
+  const registerMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email: debouncedEmail, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Registration failed");
+      return data;
+    },
+    onSuccess: () => {
+      signIn("credentials", { email, password });
+    },
+    onError: (err: any) => {
+      setError(err.message);
+    },
+  });
 
   const confirmPasswordHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setConfirmPassword(e.target.value);
@@ -21,37 +48,14 @@ const Page = () => {
     }
   };
 
-  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-    setLoading(true);
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        setError(data.error);
-        setLoading(false);
-        return;
-      }
-      setLoading(false);
-      signIn("credentials", { email, password });
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
+    setError("");
+    registerMutation.mutate();
   };
 
   return (
@@ -75,6 +79,7 @@ const Page = () => {
             type="email"
             placeholder="Email"
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
@@ -99,10 +104,10 @@ const Page = () => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={registerMutation.isPending}
             className="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
-            {loading ? "Loading..." : "Sign Up"}
+            {registerMutation.isPending ? "Loading..." : "Sign Up"}
           </button>
         </form>
 
