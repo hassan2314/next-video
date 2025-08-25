@@ -55,10 +55,10 @@ const Page = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md flex flex-col gap-5">
+    <div className="flex justify-center bg-gray-50 py-20">
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md flex flex-col gap-5 ">
         {/* --- Sign Up Form --- */}
-        <form className="flex flex-col gap-5" onSubmit={submitHandler}>
+        <form className="flex flex-col gap-5 " onSubmit={submitHandler}>
           <h1 className="text-2xl font-semibold text-center text-gray-800">
             Sign Up
           </h1>
