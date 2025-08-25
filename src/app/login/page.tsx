@@ -3,10 +3,12 @@ import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react"; // for eye icons
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -32,7 +34,6 @@ const LoginPage = () => {
       router.push("/");
     }
   };
-
   return (
     <div className="flex justify-center bg-gray-50 py-20">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md flex flex-col gap-5">
@@ -50,13 +51,23 @@ const LoginPage = () => {
             required
           />
 
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          {/* Password with Eye Toggle */}
+          <div className="relative w-full">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 pr-10"
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
@@ -68,6 +79,16 @@ const LoginPage = () => {
             {loading ? "Loading..." : "Login"}
           </button>
         </form>
+
+        {/* Forgot Password */}
+        <div className="flex justify-end">
+          <Link
+            href="/forgot-password"
+            className="text-sm text-blue-500 hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
         {/* Divider */}
         <div className="flex items-center gap-3 my-2">
@@ -99,7 +120,7 @@ const LoginPage = () => {
 
         <p className="text-sm text-gray-500 text-center">
           Don’t have an account?{" "}
-          <Link className="text-blue-500 hover:underline" href="/register">
+          <Link className="text-blue-500 hover:underline" href="/signup">
             Sign Up
           </Link>
         </p>

@@ -12,6 +12,7 @@
     "@imagekit/next": "^2.1.2",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.2",
+    "lucide-react": "^0.541.0",
     "mongoose": "^8.17.1",
     "next": "15.4.6",
     "next-auth": "^4.24.11",
