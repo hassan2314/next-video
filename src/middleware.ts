@@ -9,14 +9,23 @@ export default withAuth(
     callbacks: {
       async authorized({ req, token }) {
         const { pathname } = req.nextUrl;
+
+        // Public routes
         if (
           pathname.startsWith("/api/auth") ||
           pathname === "/login" ||
-          pathname === "/register"
-        )
+          pathname === "/register" ||
+          pathname === "/"
+        ) {
           return true;
-        if (pathname.startsWith("/") || pathname === "/api/video") return true;
+        }
 
+        // ✅ Allow only GET for /api/video
+        if (pathname === "/api/video" && req.method === "GET") {
+          return true;
+        }
+
+        // ✅ Otherwise require login
         return !!token;
       },
     },
@@ -24,15 +33,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/data (SSG data cache)
-     * - public files (public folder)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!api|_next/static|_next/data|public|favicon.ico).*)",
-  ],
+  matcher: ["/((?!api/auth|_next/static|_next/data|public|favicon.ico).*)"],
 };
