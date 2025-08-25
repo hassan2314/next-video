@@ -10,6 +10,7 @@ const ResetPasswordPage = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get("token"); // get token from URL
   const router = useRouter();
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
