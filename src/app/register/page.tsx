@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { signIn } from "next-auth/react";
-
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 const Page = () => {
@@ -11,6 +11,8 @@ const Page = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const router = useRouter();
 
   const confirmPasswordHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setConfirmPassword(e.target.value);
@@ -47,7 +49,7 @@ const Page = () => {
         return;
       }
       setLoading(false);
-      signIn("credentials", { email, password });
+      router.push("/login");
     } catch (error) {
       console.log(error);
       setLoading(false);
