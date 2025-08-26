@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password } = await req.json();
+    const { name, email, password, image } = await req.json();
     if (!name || !email || !password) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -16,7 +16,12 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const user = await User.create({ name, email, password });
+    const user = await User.create({
+      name,
+      email,
+      password,
+      image: image || null,
+    });
 
     return NextResponse.json(user);
   } catch (error) {

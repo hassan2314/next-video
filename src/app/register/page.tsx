@@ -3,12 +3,14 @@ import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import AvatarUpload from "@/components/AvatarUpload"; // 👈 import here
 
 const Page = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [avatar, setAvatar] = useState<string | null>(null); // 👈 avatar state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,15 +35,15 @@ const Page = () => {
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
           email,
           password,
+          image: avatar, // 👈 send avatar (optional)
         }),
       });
+
       const data = await response.json();
       if (!response.ok) {
         setError(data.error);
@@ -58,12 +60,27 @@ const Page = () => {
 
   return (
     <div className="flex justify-center bg-gray-50 py-20">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md flex flex-col gap-5 ">
-        {/* --- Sign Up Form --- */}
-        <form className="flex flex-col gap-5 " onSubmit={submitHandler}>
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md flex flex-col gap-5">
+        <form className="flex flex-col gap-5" onSubmit={submitHandler}>
           <h1 className="text-2xl font-semibold text-center text-gray-800">
             Sign Up
           </h1>
+
+          {/* Avatar Upload */}
+          <div className="flex flex-col items-center gap-3">
+            {avatar ? (
+              <img
+                src={avatar}
+                alt="Avatar"
+                className="w-20 h-20 rounded-full border"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                No Image
+              </div>
+            )}
+            <AvatarUpload onSuccess={(url) => setAvatar(url)} />
+          </div>
 
           <input
             type="text"
@@ -115,7 +132,7 @@ const Page = () => {
           <hr className="flex-grow border-gray-300" />
         </div>
 
-        {/* --- Social Login Buttons --- */}
+        {/* Social Logins */}
         <button
           className="w-full py-2 border border-gray-300 rounded-lg flex justify-center items-center gap-2 hover:bg-gray-100 transition text-gray-500 hover:text-gray-800"
           onClick={() => signIn("google")}
@@ -135,6 +152,7 @@ const Page = () => {
           />
           Sign In with GitHub
         </button>
+
         <p className="text-sm text-gray-500 text-center">
           Already have an account?{" "}
           <Link className="text-blue-500 hover:underline" href="/login">
