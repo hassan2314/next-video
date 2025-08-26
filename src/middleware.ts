@@ -2,7 +2,15 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-  function middleware() {
+  function middleware(req) {
+    const { pathname } = req.nextUrl;
+    const token = req.nextauth.token;
+
+    // If user is logged in and tries to access /login or /register -> redirect
+    if (token && (pathname === "/login" || pathname === "/register")) {
+      return NextResponse.redirect(new URL("/", req.url)); // redirect to homepage (or dashboard)
+    }
+
     return NextResponse.next();
   },
   {

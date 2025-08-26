@@ -35,7 +35,7 @@ const LoginPage = () => {
     }
   };
   return (
-    <div className="flex justify-center bg-gray-50 py-20">
+    <div className=" bg-gray-50 flex justify-center py-20">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md flex flex-col gap-5">
         {/* --- Login Form --- */}
         <form className="flex flex-col gap-5" onSubmit={submitHandler}>
