@@ -7,9 +7,10 @@ import { Menu, X } from "lucide-react";
 
 const Navbar = () => {
   const { data, status } = useSession();
-  const session = data; // clarity ke liye rename
+  const session = data;
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const links = [
     { href: "/", label: "Home" },
@@ -43,19 +44,41 @@ const Navbar = () => {
         </div>
 
         {/* Auth buttons */}
-        <div className="hidden md:flex items-center space-x-4">
+        <div className="hidden md:flex items-center space-x-4 relative">
           {status === "authenticated" ? (
             <>
-              <span className="text-sm text-gray-600">
-                Hi, {session?.session?.user?.name || "User"}
-              </span>
-              {console.log(session?.expires)}
+              {/* Avatar / Name trigger */}
               <button
-                onClick={() => signOut()}
-                className="bg-blue-600 hover:bg-blue-700 px-4 py-1 rounded-lg text-sm font-medium text-white"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center space-x-2 focus:outline-none"
               >
-                Logout
+                {session?.session?.user?.image ? (
+                  <img
+                    src={session.session.user.image}
+                    alt={session.session.user.name || "User"}
+                    className="w-8 h-8 rounded-full border border-gray-300"
+                  />
+                ) : (
+                  <span className="text-sm font-medium text-gray-700">
+                    {session?.session?.user?.name || "User"}
+                  </span>
+                )}
               </button>
+
+              {/* Dropdown */}
+              {dropdownOpen && (
+                <div className="absolute right-0 top-10 w-40 bg-white border border-gray-200 shadow-lg rounded-md">
+                  <button
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      signOut();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -102,7 +125,7 @@ const Navbar = () => {
             </Link>
           ))}
           <div className="mt-3">
-            {session ? (
+            {status === "authenticated" ? (
               <button
                 onClick={() => signOut()}
                 className="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium text-white"
