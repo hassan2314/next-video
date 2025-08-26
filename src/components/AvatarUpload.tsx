@@ -40,16 +40,20 @@ const AvatarUpload = ({ onSuccess }: AvatarUploadProps) => {
     setError(null);
 
     try {
+      console.log("Uploading image...");
       const authRes = await fetch("/api/auth/imagekit-auth");
+      console.log(authRes);
       const auth = await authRes.json();
+
+      console.log(auth.authenticationParameters.signature);
 
       const res = await upload({
         file,
         fileName: file.name,
-        signature: auth.signature,
+        signature: auth.authenticationParameters.signature,
         publicKey: auth.publicKey,
-        expire: auth.expire,
-        token: auth.token,
+        expire: auth.authenticationParameters.expire,
+        token: auth.authenticationParameters.token,
       });
 
       onSuccess(res.url!); // return uploaded image url
