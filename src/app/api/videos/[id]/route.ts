@@ -5,37 +5,30 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import ImageKit from "imagekit";
 
-// ImageKit instance (server-side, safe to use private key)
 const imagekit = new ImageKit({
   publicKey: process.env.NEXT_PUBLIC_PUBLIC_KEY!,
   privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
   urlEndpoint: process.env.NEXT_PUBLIC_URL_ENDPOINT!,
 });
 
-// GET video + related
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     await dbConnect();
-
-    // Get video with populated owner details (name + image if available)
     const video = await Video.findById(params.id)
-      .populate("owner", "name image email") // only fetch name, image, email
+      .populate("owner", "name image email")
       .lean();
 
     if (!video) {
       return NextResponse.json({ error: "Video not found" }, { status: 404 });
     }
 
-    // Fetch related videos (same category, exclude current one)
-    const related = await Video.find({
-      _id: { $ne: params.id },
-    })
+    const related = await Video.find({ _id: { $ne: params.id } })
       .limit(8)
       .select("title thumbnail owner createdAt")
-      .populate("owner", "name image") // also populate owner here
+      .populate("owner", "name image")
       .lean();
 
     return NextResponse.json({ video, related }, { status: 200 });
@@ -48,7 +41,6 @@ export async function GET(
   }
 }
 
-// DELETE video
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
@@ -66,14 +58,9 @@ export async function DELETE(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // Delete from ImageKit (video + thumbnail)
   try {
-    if (video.video) {
-      await imagekit.deleteFile(video.videoFileId); // you must store fileId in DB
-    }
-    if (video.thumbnail) {
-      await imagekit.deleteFile(video.thumbnailFileId); // store this too
-    }
+    if (video.video) await imagekit.deleteFile(video.videoFileId);
+    if (video.thumbnail) await imagekit.deleteFile(video.thumbnailFileId);
   } catch (err) {
     console.error("ImageKit deletion failed:", err);
   }
@@ -82,7 +69,6 @@ export async function DELETE(
   return NextResponse.json({ message: "Video deleted" }, { status: 200 });
 }
 
-// UPDATE video
 export async function PUT(
   req: Request,
   { params }: { params: { id: string } }

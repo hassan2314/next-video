@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
@@ -33,9 +34,8 @@ export default function VideoPage() {
 
   return (
     <div className="flex flex-col md:flex-row gap-4 p-4">
-      {/* Main video section */}
+      {/* Main video */}
       <div className="flex-1">
-        {/* ✅ Aspect ratio wrapper */}
         <div className="relative w-full pb-[56.25%]">
           <video
             src={video.video}
