@@ -10,6 +10,7 @@ export default function VideoPage() {
   const [video, setVideo] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [formatedDate, setFormatedDate] = useState("");
 
   useEffect(() => {
     if (!id) return;
@@ -21,6 +22,13 @@ export default function VideoPage() {
         const data = await res.json();
         setVideo(data.video);
         setRelated(data.related);
+        setFormatedDate(
+          new Date(data.video.createdAt).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        );
       } catch (err) {
         console.error("Error fetching video:", err);
       } finally {
@@ -30,6 +38,13 @@ export default function VideoPage() {
 
     fetchVideo();
   }, [id]);
+
+  const calculateDateDiff = (date2: Date) => {
+    const date1 = new Date();
+    const diffInMs = date2.getTime() - date1.getTime();
+    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+    return diffInDays;
+  };
 
   if (loading) return <p className="p-4 text-gray-600">Loading video...</p>;
   if (!video) return <p className="p-4 text-red-600">Video not found</p>;
@@ -50,6 +65,10 @@ export default function VideoPage() {
 
         <h2 className="text-xl font-semibold mt-2">{video.title}</h2>
         <p className="text-gray-600 text-sm">{video.description}</p>
+        <p className="text-gray-600 text-sm">Upload Date {formatedDate}</p>
+        <p className="text-gray-600 text-sm">
+          {calculateDateDiff(new Date(video.createdAt))} Day ago
+        </p>
 
         {/* Owner info */}
         {video.owner && (
@@ -58,7 +77,7 @@ export default function VideoPage() {
               href={`/channel/${video.owner._id}`}
               className="flex items-center gap-2 hover:opacity-80"
             >
-              <Image
+              <img
                 src={video.owner.image}
                 alt={video.owner.name}
                 width={40}
