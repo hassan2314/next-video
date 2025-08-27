@@ -14,6 +14,7 @@
     "@types/bcryptjs": "^2.4.6",
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
+    "imagekit": "^6.0.0",
     "lucide-react": "^0.541.0",
     "mongoose": "^8.17.1",
     "next": "15.4.6",
