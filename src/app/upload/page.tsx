@@ -131,6 +131,7 @@ export default function UploadPage() {
           </div>
 
           {/* Video Upload */}
+
           <div>
             <label className="block text-sm font-medium  text-gray-700">
               Upload Video *
@@ -141,17 +142,26 @@ export default function UploadPage() {
               onSuccess={(res) => setVideoUrl(res.url)}
               onProgress={(p) => setProgress(p)}
             />
+
             {progress > 0 && (
               <p className="text-sm text-gray-500 mt-1">
                 Upload progress: {progress}%
               </p>
             )}
+
             {videoUrl && (
               <video
-                src={videoUrl}
+                src={`${videoUrl}?tr=sr-720p`} // request a streaming-ready 720p file
                 controls
+                playsInline
+                preload="metadata"
                 className="w-full rounded-lg mt-3"
               />
+            )}
+            {videoUrl && (
+              <p className="text-sm text-gray-500 mt-1">
+                Video URL: {videoUrl}
+              </p>
             )}
           </div>
 
