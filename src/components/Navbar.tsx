@@ -64,7 +64,7 @@ const Navbar = () => {
                   </span>
                 )}
               </button>
-              {console.log(session)}
+
               {/* Dropdown */}
               {dropdownOpen && (
                 <div className="absolute right-0 top-10 w-40 bg-white border border-gray-200 shadow-lg rounded-md">

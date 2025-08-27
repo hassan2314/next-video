@@ -3,10 +3,10 @@ import mongoose, { Schema, model, models } from "mongoose";
 export interface IVideo {
   _id: mongoose.Types.ObjectId;
   title: string;
-  description: string;
+  description?: string;
   video: string;
   thumbnail: string;
-  transforation?: {
+  transformation?: {
     width: number;
     height: number;
     quality: number;
@@ -18,41 +18,18 @@ export interface IVideo {
 
 const videoSchema = new Schema<IVideo>(
   {
-    title: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    video: {
-      type: String,
-      required: true,
-    },
-    thumbnail: {
-      type: String,
-      required: true,
-    },
-    controls: {
-      type: Boolean,
-      default: true,
-    },
-    transforation: {
-      width: {
-        type: Number,
-      },
-      height: {
-        type: Number,
-      },
-      quality: {
-        type: Number,
-      },
+    title: { type: String, required: true },
+    description: { type: String },
+    video: { type: String, required: true },
+    thumbnail: { type: String, required: true },
+    controls: { type: Boolean, default: true },
+    transformation: {
+      width: Number,
+      height: Number,
+      quality: Number,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-export const Video = models.Video || model("Video", videoSchema);
+export const Video = models.Video || model<IVideo>("Video", videoSchema);

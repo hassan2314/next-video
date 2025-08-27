@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.7",
     "@imagekit/next": "^2.1.2",
     "@types/bcryptjs": "^2.4.6",
+    "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
     "lucide-react": "^0.541.0",
     "mongoose": "^8.17.1",
