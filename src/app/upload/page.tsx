@@ -4,6 +4,7 @@
 import { useState } from "react";
 import axios from "axios";
 import VideoUpload from "@/components/VideoUpload";
+import { useSession } from "next-auth/react";
 
 export default function UploadPage() {
   const [title, setTitle] = useState("");
@@ -15,11 +16,19 @@ export default function UploadPage() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const { data: session } = useSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
+    const owner = session?.session.user?.id ?? null;
+    console.log(owner);
+
+    if (!owner) {
+      setError("You must be logged in to upload a video");
+      return;
+    }
 
     if (!title.trim()) {
       setError("Title is required");
@@ -40,6 +49,7 @@ export default function UploadPage() {
         title,
         description,
         category,
+        owner,
         video: videoUrl,
         thumbnail: thumbnailUrl,
       });
@@ -61,7 +71,6 @@ export default function UploadPage() {
       );
     } finally {
       setUploading(false);
-      alert("Finshed");
     }
   };
 

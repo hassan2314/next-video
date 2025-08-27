@@ -2,6 +2,7 @@ import mongoose, { Schema, model, models } from "mongoose";
 
 export interface IVideo {
   _id: mongoose.Types.ObjectId;
+  owner: mongoose.Types.ObjectId;
   title: string;
   description?: string;
   video: string;
@@ -19,6 +20,7 @@ export interface IVideo {
 const videoSchema = new Schema<IVideo>(
   {
     title: { type: String, required: true },
+    owner: { type: Schema.Types.ObjectId, required: true, ref: "User" },
     description: { type: String },
     video: { type: String, required: true },
     thumbnail: { type: String, required: true },
