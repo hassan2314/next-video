@@ -1,43 +1,112 @@
-// app/api/videos/[id]/route.ts
 import { dbConnect } from "@/lib/db";
 import { Video } from "@/models/Video";
+import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
+import ImageKit from "imagekit";
 
+// ImageKit instance (server-side, safe to use private key)
+const imagekit = new ImageKit({
+  publicKey: process.env.NEXT_PUBLIC_PUBLIC_KEY!,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
+  urlEndpoint: process.env.NEXT_PUBLIC_URL_ENDPOINT!,
+});
+
+// GET video + related
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  await dbConnect();
+  try {
+    await dbConnect();
 
-  const video = await Video.findById(params.id);
-  if (!video) return new Response("Video not found", { status: 404 });
+    // Get video with populated owner details (name + image if available)
+    const video = await Video.findById(params.id)
+      .populate("owner", "name image email") // only fetch name, image, email
+      .lean();
 
-  // Get related videos (same category or random for now)
-  const related = await Video.find({
-    _id: { $ne: params.id },
-    category: video.category,
-  })
-    .limit(8)
-    .select("title thumbnail channelName");
+    if (!video) {
+      return NextResponse.json({ error: "Video not found" }, { status: 404 });
+    }
 
-  return Response.json({ video, related });
+    // Fetch related videos (same category, exclude current one)
+    const related = await Video.find({
+      _id: { $ne: params.id },
+    })
+      .limit(8)
+      .select("title thumbnail owner createdAt")
+      .populate("owner", "name image") // also populate owner here
+      .lean();
+
+    return NextResponse.json({ video, related }, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching video:", error);
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
+  }
 }
 
+// DELETE video
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   await dbConnect();
-  const video = await Video.findByIdAndDelete(params.id);
-  if (!video) return new Response("Video not found", { status: 404 });
-  return new Response("Video deleted", { status: 200 });
+  const session = await getServerSession(authOptions);
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const video = await Video.findById(params.id);
+  if (!video)
+    return NextResponse.json({ error: "Video not found" }, { status: 404 });
+
+  if (video.owner.toString() !== session.session.user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Delete from ImageKit (video + thumbnail)
+  try {
+    if (video.video) {
+      await imagekit.deleteFile(video.videoFileId); // you must store fileId in DB
+    }
+    if (video.thumbnail) {
+      await imagekit.deleteFile(video.thumbnailFileId); // store this too
+    }
+  } catch (err) {
+    console.error("ImageKit deletion failed:", err);
+  }
+
+  await video.deleteOne();
+  return NextResponse.json({ message: "Video deleted" }, { status: 200 });
 }
 
+// UPDATE video
 export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   await dbConnect();
-  const video = await Video.findByIdAndUpdate(params.id, await req.json());
-  if (!video) return new Response("Video not found", { status: 404 });
-  return new Response("Video updated", { status: 200 });
+  const session = await getServerSession(authOptions);
+  if (!session)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const video = await Video.findById(params.id);
+  if (!video)
+    return NextResponse.json({ error: "Video not found" }, { status: 404 });
+
+  if (video.owner.toString() !== session.session.user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const data = await req.json();
+  const updatedVideo = await Video.findByIdAndUpdate(params.id, data, {
+    new: true,
+  });
+
+  return NextResponse.json(
+    { message: "Video updated", video: updatedVideo },
+    { status: 200 }
+  );
 }
