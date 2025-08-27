@@ -3,6 +3,7 @@ import { dbConnect } from "@/lib/db";
 import { IVideo, Video } from "@/models/Video";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 
 export async function GET() {
   try {
@@ -28,15 +29,16 @@ export async function POST(req: Request) {
     await dbConnect();
 
     const body: Partial<IVideo> = await req.json();
-    if (!body.title || !body.video || !body.thumbnail) {
+    if (!body.title || !body.video || !body.thumbnail || !body.owner) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
-
+    console.log(body);
     const videoData = {
       ...body,
+      owner: new mongoose.Types.ObjectId(body.owner),
       controls: body?.controls ?? true,
       transformation: {
         height: 1080,
