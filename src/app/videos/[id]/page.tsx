@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function VideoPage() {
   const { id } = useParams();
   const [video, setVideo] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [formatedDate, setFormatedDate] = useState("");
 
   useEffect(() => {
     if (!id) return;
@@ -19,6 +22,13 @@ export default function VideoPage() {
         const data = await res.json();
         setVideo(data.video);
         setRelated(data.related);
+        setFormatedDate(
+          new Date(data.video.createdAt).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        );
       } catch (err) {
         console.error("Error fetching video:", err);
       } finally {
@@ -28,6 +38,13 @@ export default function VideoPage() {
 
     fetchVideo();
   }, [id]);
+
+  const calculateDateDiff = (date2: Date) => {
+    const date1 = new Date();
+    const diffInMs = date2.getTime() - date1.getTime();
+    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+    return diffInDays;
+  };
 
   if (loading) return <p className="p-4 text-gray-600">Loading video...</p>;
   if (!video) return <p className="p-4 text-red-600">Video not found</p>;
@@ -48,6 +65,29 @@ export default function VideoPage() {
 
         <h2 className="text-xl font-semibold mt-2">{video.title}</h2>
         <p className="text-gray-600 text-sm">{video.description}</p>
+        <p className="text-gray-600 text-sm">Upload Date {formatedDate}</p>
+        <p className="text-gray-600 text-sm">
+          {calculateDateDiff(new Date(video.createdAt))} Day ago
+        </p>
+
+        {/* Owner info */}
+        {video.owner && (
+          <div className="flex items-center gap-2 mt-4">
+            <Link
+              href={`/channel/${video.owner._id}`}
+              className="flex items-center gap-2 hover:opacity-80"
+            >
+              <img
+                src={video.owner.image}
+                alt={video.owner.name}
+                width={40}
+                height={40}
+                className="rounded-full object-cover"
+              />
+              <span className="font-medium">{video.owner.name}</span>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Related videos */}
@@ -55,7 +95,7 @@ export default function VideoPage() {
         <h3 className="text-lg font-semibold">Related Videos</h3>
         {related.length > 0 ? (
           related.map((v) => (
-            <a
+            <Link
               key={v._id}
               href={`/videos/${v._id}`}
               className="flex gap-2 hover:bg-gray-100 p-2 rounded-lg"
@@ -65,13 +105,22 @@ export default function VideoPage() {
                 alt={v.title}
                 className="w-28 h-16 object-cover rounded"
               />
-              <div>
+              <div className="flex-1">
                 <p className="font-medium text-sm line-clamp-2">{v.title}</p>
-                {v.channelName && (
-                  <p className="text-xs text-gray-500">{v.channelName}</p>
+
+                {/* Owner info */}
+                {v.owner && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <img
+                      src={v.owner.image || "/default-avatar.png"}
+                      alt={v.owner.name}
+                      className="w-5 h-5 rounded-full object-cover"
+                    />
+                    <p className="text-xs text-gray-500">{v.owner.name}</p>
+                  </div>
                 )}
               </div>
-            </a>
+            </Link>
           ))
         ) : (
           <p className="text-gray-500 text-sm">No related videos</p>
