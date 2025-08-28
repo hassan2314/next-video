@@ -24,6 +24,8 @@ export default withAuth(
           pathname === "/login" ||
           pathname === "/register" ||
           pathname === "/" ||
+          pathname === "/forgot-password" ||
+          pathname === "/reset-password" ||
           pathname.startsWith("/videos/") ||
           pathname.startsWith("/channel/")
         ) {
