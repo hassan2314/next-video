@@ -24,8 +24,9 @@ export default function EditVideo({ params }: { params: { id: string } }) {
         setDescription(data.video.description || "");
         setVideoUrl(data.video.video);
         setThumbnailUrl(data.video.thumbnail);
-      } catch (err: any) {
-        setError(err.message || "Error fetching video");
+      } catch (err: unknown) {
+        console.error("Error fetching video:", err);
+        setError("Failed to fetch video");
       } finally {
         setLoading(false);
       }

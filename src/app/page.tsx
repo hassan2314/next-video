@@ -34,9 +34,14 @@ export default function HomePage() {
         }
 
         setVideos(data.videos);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching videos:", err);
-        setError(err.message || "Something went wrong while fetching videos");
+
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Something went wrong while fetching videos");
+        }
       } finally {
         setLoading(false);
       }

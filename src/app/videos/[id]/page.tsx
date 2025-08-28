@@ -6,12 +6,28 @@ import Link from "next/link";
 import { timeAgo } from "@/utils/date";
 import { useSession } from "next-auth/react";
 
+interface User {
+  _id: string;
+  name: string;
+  image: string;
+}
+
+interface Video {
+  _id: string;
+  title: string;
+  description: string;
+  video: string;
+  thumbnail: string;
+  createdAt: string;
+  owner?: User;
+}
+
 export default function VideoPage() {
   const { id } = useParams();
   const router = useRouter();
   const { data: session } = useSession();
-  const [video, setVideo] = useState<any>(null);
-  const [related, setRelated] = useState<any[]>([]);
+  const [video, setVideo] = useState<Video | null>(null);
+  const [related, setRelated] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [formatedDate, setFormatedDate] = useState("");
 
