@@ -24,13 +24,18 @@ export default withAuth(
           pathname === "/login" ||
           pathname === "/register" ||
           pathname === "/" ||
-          pathname.startsWith("/videos/")
+          pathname.startsWith("/videos/") ||
+          pathname.startsWith("/channel/")
         ) {
           return true;
         }
 
         // ✅ Allow only GET for /api/video
-        if (pathname === "/api/video" || pathname.startsWith("/api/videos/")) {
+        if (
+          pathname === "/api/video" ||
+          pathname.startsWith("/api/videos/") ||
+          pathname.startsWith("/api/channel/")
+        ) {
           if (req.method === "GET") return true;
         }
 

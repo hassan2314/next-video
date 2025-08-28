@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
+import { timeAgo } from "@/utils/date";
 
 interface User {
   _id: string;
@@ -13,10 +13,11 @@ interface User {
 
 interface Video {
   _id: string;
+  owner: User;
   title: string;
   description: string;
   url: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export default function ChannelPage() {
@@ -46,23 +47,23 @@ export default function ChannelPage() {
   }, [id]);
 
   if (loading) return <p>Loading...</p>;
-  if (!user) return <p>Channel not found</p>;
+  // if (!user) return <p>Channel not found</p>;
   // https://ik.imagekit.io/fklsjyb5h/as_ZNKSoP2w0.jpg
   // https://ik.imagekit.io/fklsjyb5h/as_ZNKSoP2w0.jpg
   return (
     <div className="p-4">
       <div className="flex items-center gap-4 mb-6">
         <img
-          src={user.image || "/default-avatar.png"}
-          alt={user.name}
+          src={videos[0].owner.image || "/default-avatar.png"}
+          alt={videos[0].owner.name}
           width={100}
           height={100}
           className="rounded-full"
         />
-        {user.image}
+
         <div>
-          <h1 className="text-xl font-bold">{user.name}</h1>
-          <p className="text-gray-600">{user.email}</p>
+          <h1 className="text-xl font-bold">{videos[0].owner.name}</h1>
+          <p className="text-gray-600">{videos[0].owner.email}</p>
         </div>
       </div>
 
@@ -75,6 +76,11 @@ export default function ChannelPage() {
             </video>
             <h3 className="mt-2 font-medium">{video.title}</h3>
             <p className="text-sm text-gray-600">{video.description}</p>
+            {video.createdAt && (
+              <p className="text-xs text-gray-400 mt-1">
+                {timeAgo(new Date(video.createdAt))}
+              </p>
+            )}
           </div>
         ))}
       </div>
