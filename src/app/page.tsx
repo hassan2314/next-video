@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
+import { timeAgo } from "@/utils/date";
 
 interface Video {
   _id: string;
@@ -90,7 +90,7 @@ export default function HomePage() {
                     )}
                     {video.createdAt && (
                       <p className="text-xs text-gray-400 mt-1">
-                        {new Date(video.createdAt).toLocaleDateString()}
+                        {timeAgo(new Date(video.createdAt))}
                       </p>
                     )}
                   </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { timeAgo } from "@/utils/date";
 
 export default function VideoPage() {
   const { id } = useParams();
@@ -38,12 +39,12 @@ export default function VideoPage() {
     fetchVideo();
   }, [id]);
 
-  const calculateDateDiff = (date2: Date) => {
-    const date1 = new Date();
-    const diffInMs = date1.getTime() - date2.getTime();
-    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
-    return diffInDays;
-  };
+  // const calculateDateDiff = (date2: Date) => {
+  //   const date1 = new Date();
+  //   const diffInMs = date1.getTime() - date2.getTime();
+  //   const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+  //   return diffInDays;
+  // };
 
   if (loading) return <p className="p-4 text-gray-600">Loading video...</p>;
   if (!video) return <p className="p-4 text-red-600">Video not found</p>;
@@ -66,9 +67,7 @@ export default function VideoPage() {
         <p className="text-gray-600 text-sm">{video.description}</p>
         <p className="text-gray-600 text-sm">Upload Date {formatedDate}</p>
         <p className="text-gray-600 text-sm">
-          {calculateDateDiff(new Date(video.createdAt))}{" "}
-          {calculateDateDiff(new Date(video.createdAt)) === 1 ? "Day" : "Days"}{" "}
-          ago
+          {timeAgo(new Date(video.createdAt))}
         </p>
 
         {/* Owner info */}
