@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 
 export default function VideoPage() {
@@ -41,7 +40,7 @@ export default function VideoPage() {
 
   const calculateDateDiff = (date2: Date) => {
     const date1 = new Date();
-    const diffInMs = date2.getTime() - date1.getTime();
+    const diffInMs = date1.getTime() - date2.getTime();
     const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
     return diffInDays;
   };
@@ -67,7 +66,9 @@ export default function VideoPage() {
         <p className="text-gray-600 text-sm">{video.description}</p>
         <p className="text-gray-600 text-sm">Upload Date {formatedDate}</p>
         <p className="text-gray-600 text-sm">
-          {calculateDateDiff(new Date(video.createdAt))} Day ago
+          {calculateDateDiff(new Date(video.createdAt))}{" "}
+          {calculateDateDiff(new Date(video.createdAt)) === 1 ? "Day" : "Days"}{" "}
+          ago
         </p>
 
         {/* Owner info */}

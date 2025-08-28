@@ -8,7 +8,10 @@ import mongoose from "mongoose";
 export async function GET() {
   try {
     await dbConnect();
-    const videos = await Video.find({}).sort({ createdAt: -1 }).lean();
+    const videos = await Video.find({})
+      .sort({ createdAt: -1 })
+      .populate("owner", "name image")
+      .lean();
     return NextResponse.json({ videos }, { status: 200 });
   } catch (error) {
     console.error(error);
