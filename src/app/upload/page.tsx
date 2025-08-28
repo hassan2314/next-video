@@ -5,6 +5,7 @@ import { useState } from "react";
 import axios from "axios";
 import VideoUpload from "@/components/VideoUpload";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 export default function UploadPage() {
   const [title, setTitle] = useState("");
@@ -17,6 +18,7 @@ export default function UploadPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const { data: session } = useSession();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +66,7 @@ export default function UploadPage() {
         alert(
           "Video uploaded successfully! You can now view it on the dashboard."
         );
+        router.push("/");
       }
     } catch (err: any) {
       setError(

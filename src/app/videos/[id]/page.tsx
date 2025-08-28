@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { timeAgo } from "@/utils/date";
+import { useSession } from "next-auth/react";
 
 export default function VideoPage() {
   const { id } = useParams();
+  const router = useRouter();
+  const { data: session } = useSession();
   const [video, setVideo] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,15 +42,25 @@ export default function VideoPage() {
     fetchVideo();
   }, [id]);
 
-  // const calculateDateDiff = (date2: Date) => {
-  //   const date1 = new Date();
-  //   const diffInMs = date1.getTime() - date2.getTime();
-  //   const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
-  //   return diffInDays;
-  // };
+  async function handleDelete() {
+    if (!confirm("Are you sure you want to delete this video?")) return;
+
+    try {
+      const res = await fetch(`/api/videos/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete video");
+
+      alert("Video deleted successfully");
+      router.push("/"); // go back to homepage
+    } catch (err) {
+      console.error("Error deleting video:", err);
+      alert("Failed to delete video");
+    }
+  }
 
   if (loading) return <p className="p-4 text-gray-600">Loading video...</p>;
   if (!video) return <p className="p-4 text-red-600">Video not found</p>;
+
+  const isOwner = session?.session?.user?.id === video.owner?._id;
 
   return (
     <div className="flex flex-col md:flex-row gap-4 p-4">
@@ -86,6 +99,24 @@ export default function VideoPage() {
               />
               <span className="font-medium">{video.owner.name}</span>
             </Link>
+          </div>
+        )}
+
+        {/* Edit/Delete buttons only for owner */}
+        {isOwner && (
+          <div className="flex gap-2 mt-4">
+            <Link
+              href={`/videos/${video._id}/edit`}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Edit
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Delete
+            </button>
           </div>
         )}
       </div>
