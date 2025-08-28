@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function EditVideo({ params }: { params: { id: string } }) {
+export default function EditVideo({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -12,11 +16,16 @@ export default function EditVideo({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [videoId, setVideoId] = useState<string>("");
 
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const res = await fetch(`/api/videos/${params.id}`);
+        // Await params to get the id
+        const { id } = await params;
+        setVideoId(id);
+
+        const res = await fetch(`/api/videos/${id}`);
         if (!res.ok) throw new Error("Failed to fetch video");
         const data = await res.json();
 
@@ -32,7 +41,7 @@ export default function EditVideo({ params }: { params: { id: string } }) {
       }
     };
     fetchVideo();
-  }, [params.id]);
+  }, [params]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +54,7 @@ export default function EditVideo({ params }: { params: { id: string } }) {
     }
 
     try {
-      const res = await fetch(`/api/videos/${params.id}`, {
+      const res = await fetch(`/api/videos/${videoId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, description }),
@@ -53,7 +62,7 @@ export default function EditVideo({ params }: { params: { id: string } }) {
 
       if (res.ok) {
         setSuccess("✅ Video updated successfully!");
-        setTimeout(() => router.push(`/videos/${params.id}`), 1500);
+        setTimeout(() => router.push(`/videos/${videoId}`), 1500);
       } else {
         const data = await res.json();
         setError(data.error || "Failed to update video");

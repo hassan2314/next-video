@@ -22,7 +22,6 @@ interface Video {
 
 export default function ChannelPage() {
   const { id } = useParams();
-  const [user, setUser] = useState<User | null>(null);
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,7 +31,6 @@ export default function ChannelPage() {
         const res = await fetch(`/api/channel/${id}`);
         const data = await res.json();
         if (res.ok) {
-          setUser(data.user);
           setVideos(data.videos);
         } else {
           console.error(data.error);

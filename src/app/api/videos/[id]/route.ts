@@ -13,11 +13,15 @@ const imagekit = new ImageKit({
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
-    const video = await Video.findById(params.id)
+
+    // Await the params since they're now a Promise
+    const { id } = await params;
+
+    const video = await Video.findById(id)
       .populate("owner", "name image email")
       .lean();
 
@@ -25,7 +29,7 @@ export async function GET(
       return NextResponse.json({ error: "Video not found" }, { status: 404 });
     }
 
-    const related = await Video.find({ _id: { $ne: params.id } })
+    const related = await Video.find({ _id: { $ne: id } })
       .limit(8)
       .select("title thumbnail owner createdAt")
       .populate("owner", "name image")
@@ -43,18 +47,21 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     console.log("Updating video...");
+
+    // Await the params since they're now a Promise
+    const { id } = await params;
 
     const session = await getServerSession(authOptions);
     console.log("Session : ", session);
     if (!session)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const video = await Video.findById(params.id);
+    const video = await Video.findById(id);
     if (!video)
       return NextResponse.json({ error: "Video not found" }, { status: 404 });
 
@@ -62,13 +69,12 @@ export async function PUT(
     console.log("Video Owner: ", video.owner.toString());
 
     if (video.owner.toString() !== session?.user?.id) {
-      // ✅ fixed path
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { title, description } = await req.json();
     const updatedVideo = await Video.findByIdAndUpdate(
-      params.id,
+      id,
       { title, description },
       { new: true }
     );
@@ -88,38 +94,51 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  await dbConnect();
-  const session = await getServerSession(authOptions);
-  if (!session)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const video = await Video.findById(params.id);
-  if (!video)
-    return NextResponse.json({ error: "Video not found" }, { status: 404 });
-
-  console.log(
-    "Session User: ",
-    session?.user?.id,
-    "Video Owner: ",
-    video.owner.toString()
-  );
-
-  if (video.owner.toString() !== session?.user?.id) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  // ✅ Keep your ImageKit cleanup from `edit`
   try {
-    if (video.videoFileId) await imagekit.deleteFile(video.videoFileId);
-    if (video.thumbnailFileId) await imagekit.deleteFile(video.thumbnailFileId);
-  } catch (err) {
-    console.error("ImageKit deletion failed:", err);
+    await dbConnect();
+
+    // Await the params since they're now a Promise
+    const { id } = await params;
+
+    const session = await getServerSession(authOptions);
+    if (!session)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const video = await Video.findById(id);
+    if (!video)
+      return NextResponse.json({ error: "Video not found" }, { status: 404 });
+
+    console.log(
+      "Session User: ",
+      session?.user?.id,
+      "Video Owner: ",
+      video.owner.toString()
+    );
+
+    if (video.owner.toString() !== session?.user?.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Keep your ImageKit cleanup
+    try {
+      if (video.videoFileId) await imagekit.deleteFile(video.videoFileId);
+      if (video.thumbnailFileId)
+        await imagekit.deleteFile(video.thumbnailFileId);
+    } catch (err) {
+      console.error("ImageKit deletion failed:", err);
+    }
+
+    // Delete the video
+    await video.deleteOne();
+
+    return NextResponse.json({ message: "Video deleted" }, { status: 200 });
+  } catch (error) {
+    console.error("Error deleting video:", error);
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
-
-  // ✅ Just delete the video (no need to update it first)
-  await video.deleteOne();
-
-  return NextResponse.json({ message: "Video deleted" }, { status: 200 });
 }

@@ -1,12 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-
 import { useRouter } from "next/navigation";
 
-const ResetPasswordPage = () => {
+// Create a separate component that uses useSearchParams
+const ResetPasswordForm = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get("token"); // get token from URL
   const router = useRouter();
@@ -47,7 +47,7 @@ const ResetPasswordPage = () => {
         router.push("/login");
       }
     } catch (err) {
-      setError("Failed to reset password. Try again later.");
+      setError(`Failed to reset password. Try again later. ${err}`);
     }
     setLoading(false);
   };
@@ -120,6 +120,24 @@ const ResetPasswordPage = () => {
         </p>
       </div>
     </div>
+  );
+};
+
+// Loading component for Suspense fallback
+const LoadingFallback = () => (
+  <div className="flex justify-center bg-gray-50 py-20">
+    <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md flex justify-center">
+      <p className="text-gray-600">Loading...</p>
+    </div>
+  </div>
+);
+
+// Main page component that wraps the form in Suspense
+const ResetPasswordPage = () => {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 };
 
