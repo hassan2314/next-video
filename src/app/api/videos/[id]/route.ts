@@ -98,23 +98,28 @@ export async function DELETE(
   const video = await Video.findById(params.id);
   if (!video)
     return NextResponse.json({ error: "Video not found" }, { status: 404 });
+
   console.log(
     "Session User: ",
     session?.user?.id,
     "Video Owner: ",
     video.owner.toString()
   );
+
   if (video.owner.toString() !== session?.user?.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // ✅ Keep your ImageKit cleanup from `edit`
   try {
-    if (video.video) await imagekit.deleteFile(video.videoFileId);
-    if (video.thumbnail) await imagekit.deleteFile(video.thumbnailFileId);
+    if (video.videoFileId) await imagekit.deleteFile(video.videoFileId);
+    if (video.thumbnailFileId) await imagekit.deleteFile(video.thumbnailFileId);
   } catch (err) {
     console.error("ImageKit deletion failed:", err);
   }
 
+  // ✅ Just delete the video (no need to update it first)
   await video.deleteOne();
+
   return NextResponse.json({ message: "Video deleted" }, { status: 200 });
 }
