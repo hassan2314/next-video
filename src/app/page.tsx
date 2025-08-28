@@ -10,6 +10,11 @@ interface Video {
   video: string;
   thumbnail?: string;
   createdAt?: string;
+  owner: {
+    _id: string;
+    name: string;
+    image?: string;
+  };
 }
 
 export default function HomePage() {
@@ -83,15 +88,35 @@ export default function HomePage() {
                     <h2 className="text-lg font-semibold text-gray-800">
                       {video.title}
                     </h2>
-                    {video.description && (
+                    {/* {video.description && (
                       <p className="text-sm text-gray-600 line-clamp-2">
                         {video.description}
                       </p>
-                    )}
+                    )} */}
                     {video.createdAt && (
                       <p className="text-xs text-gray-400 mt-1">
                         {timeAgo(new Date(video.createdAt))}
                       </p>
+                    )}
+                    {/* Owner info */}
+                    {video.owner && (
+                      <div className="flex items-center gap-2 mt-4">
+                        <Link
+                          href={`/channel/${video.owner._id}`}
+                          className="flex items-center gap-2 hover:opacity-80"
+                        >
+                          <img
+                            src={video.owner.image}
+                            alt={video.owner.name}
+                            width={40}
+                            height={40}
+                            className="rounded-full object-cover"
+                          />
+                          <span className="font-medium text-1xl text-gray-800">
+                            {video.owner.name}
+                          </span>
+                        </Link>
+                      </div>
                     )}
                   </div>
                 </div>
