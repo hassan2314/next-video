@@ -58,14 +58,20 @@ export const authOptions: NextAuthOptions = {
       if (!existingUser) {
         // New user → create in DB
 
-        await User.create({
+        const newUser = await User.create({
           name: user.name,
           email: user.email,
           provider: account?.provider,
           provider_id: user.id || null,
           image: user.image || null,
         });
-
+        user.id = newUser._id.toString();
+        console.log(
+          "user id: ",
+          user.id,
+          "New User id :",
+          newUser._id.toString()
+        );
         // Allow login
         return true;
       }
@@ -94,7 +100,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.name = token.name as string;
         session.user.email = token.email as string;
-        session.user.image = token?.image as string;
+        session.user.image = token.image as string;
       }
       return session;
     },
