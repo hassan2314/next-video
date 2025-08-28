@@ -9,8 +9,5 @@ export async function GET(req: Request) {
       status: 401,
     });
   }
-
-  return new Response(JSON.stringify({ authenticated: true, session }), {
-    status: 200,
-  });
+  return new Response(JSON.stringify(session), { status: 200 });
 }

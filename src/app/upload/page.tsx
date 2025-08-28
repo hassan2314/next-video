@@ -5,7 +5,7 @@ import { useState } from "react";
 import axios from "axios";
 import VideoUpload from "@/components/VideoUpload";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function UploadPage() {
   const [title, setTitle] = useState("");
@@ -24,7 +24,7 @@ export default function UploadPage() {
     e.preventDefault();
     setError("");
     setSuccess("");
-    const owner = session?.session.user?.id ?? null;
+    const owner = session?.user?.id ?? null;
     console.log(owner);
 
     if (!owner) {

@@ -52,19 +52,19 @@ const Navbar = () => {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center space-x-2 focus:outline-none"
               >
-                {session?.session?.user?.image ? (
+                {session?.user?.image ? (
                   <img
-                    src={session.session.user.image}
-                    alt={session.session.user.name || "User"}
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
                     className="w-8 h-8 rounded-full border border-gray-300"
                   />
                 ) : (
                   <span className="text-sm font-medium text-gray-700">
-                    {session?.session?.user?.name || "User"}
+                    {session?.user?.name || "User"}
                   </span>
                 )}
               </button>
-
+              {console.log(session)}
               {/* Dropdown */}
               {dropdownOpen && (
                 <div className="absolute right-0 top-10 w-40 bg-white border border-gray-200 shadow-lg rounded-md">

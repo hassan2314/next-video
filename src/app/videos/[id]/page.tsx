@@ -60,7 +60,7 @@ export default function VideoPage() {
   if (loading) return <p className="p-4 text-gray-600">Loading video...</p>;
   if (!video) return <p className="p-4 text-red-600">Video not found</p>;
 
-  const isOwner = session?.session?.user?.id === video.owner?._id;
+  const isOwner = session?.user?.id === video.owner?._id;
 
   return (
     <div className="flex flex-col md:flex-row gap-4 p-4">
