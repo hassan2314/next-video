@@ -5,10 +5,6 @@ type FetchOptions = {
   Method?: "GET" | "POST" | "PUT" | "DELETE";
   headers?: Record<string, string>;
   body?: any;
-  // Query?: string
-  // Body?: string
-  // url: string
-  // params?: any
 };
 
 class ApiClient {

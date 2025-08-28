@@ -68,10 +68,13 @@ export default function UploadPage() {
         );
         router.push("/");
       }
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Failed to upload video. Please try again."
-      );
+    } catch (err: unknown) {
+      console.error("Error uploading video:", err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong while uploading video");
+      }
     } finally {
       setUploading(false);
     }
@@ -151,7 +154,7 @@ export default function UploadPage() {
 
             <VideoUpload
               fileType="video"
-              onSuccess={(res) => setVideoUrl(res.url)}
+              onSuccess={(res) => setVideoUrl(res.url ?? "")}
               onProgress={(p) => setProgress(p)}
             />
 
@@ -184,7 +187,7 @@ export default function UploadPage() {
             </label>
             <VideoUpload
               fileType="image"
-              onSuccess={(res) => setThumbnailUrl(res.url)}
+              onSuccess={(res) => setThumbnailUrl(res.url ?? "")}
             />
             {thumbnailUrl && (
               <img

@@ -7,10 +7,11 @@ import {
   ImageKitUploadNetworkError,
   upload,
 } from "@imagekit/next";
+import type { UploadResponse } from "@imagekit/javascript/dist/interfaces";
 import { useState } from "react";
 
 interface VideoUploadProps {
-  onSuccess: (response: any) => void;
+  onSuccess: (response: UploadResponse) => void; // ✅ replaced any with UploadResponse
   onProgress?: (progress: number) => void;
   fileType: "video" | "image";
 }
@@ -60,10 +61,10 @@ const VideoUpload = ({ onSuccess, onProgress, fileType }: VideoUploadProps) => {
     setUploading(true);
     setError(null);
     try {
-      const authRes = await fetch("/api/auth/imagekit-auth"); // ✅ fixed missing "/"
+      const authRes = await fetch("/api/auth/imagekit-auth");
       const auth = await authRes.json();
 
-      const res = await upload({
+      const res: UploadResponse = await upload({
         file: file,
         fileName: file.name,
         signature: auth.authenticationParameters.signature,
@@ -102,9 +103,9 @@ const VideoUpload = ({ onSuccess, onProgress, fileType }: VideoUploadProps) => {
         accept={fileType === "video" ? "video/*" : "image/*"}
         onChange={handleFileChange}
         disabled={uploading}
-        className="w-full border p-3  text-gray-800 rounded-lg focus:ring focus:ring-blue-300 mt-1"
+        className="w-full border p-3 text-gray-800 rounded-lg focus:ring focus:ring-blue-300 mt-1"
       />
-      {uploading && <p className="text-sm text-gray-800 ">Uploading...</p>}
+      {uploading && <p className="text-sm text-gray-800">Uploading...</p>}
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   );
