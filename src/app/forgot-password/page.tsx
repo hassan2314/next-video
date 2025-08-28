@@ -36,7 +36,7 @@ const ForgotPasswordPage = () => {
         }, 5000);
       }
     } catch (err) {
-      setError("Failed to send reset link. Try again later.");
+      setError(`Failed to send reset link. Try again later. ${err}`);
     }
 
     setLoading(false);
