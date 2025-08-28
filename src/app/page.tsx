@@ -88,11 +88,11 @@ export default function HomePage() {
                     <h2 className="text-lg font-semibold text-gray-800">
                       {video.title}
                     </h2>
-                    {/* {video.description && (
-                      <p className="text-sm text-gray-600 line-clamp-2">
+                    {video.description && (
+                      <p className="text-sm text-gray-600 truncate">
                         {video.description}
                       </p>
-                    )} */}
+                    )}
                     {video.createdAt && (
                       <p className="text-xs text-gray-400 mt-1">
                         {timeAgo(new Date(video.createdAt))}

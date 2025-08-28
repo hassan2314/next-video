@@ -75,7 +75,9 @@ export default function ChannelPage() {
               <source src={video.url} type="video/mp4" />
             </video>
             <h3 className="mt-2 font-medium">{video.title}</h3>
-            <p className="text-sm text-gray-600">{video.description}</p>
+            <p className="text-sm text-gray-600 truncate">
+              {video.description}
+            </p>
             {video.createdAt && (
               <p className="text-xs text-gray-400 mt-1">
                 {timeAgo(new Date(video.createdAt))}
