@@ -86,10 +86,14 @@ export async function PUT(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const data = await req.json();
-  const updatedVideo = await Video.findByIdAndUpdate(params.id, data, {
-    new: true,
-  });
+  const { title, description } = await req.json();
+  const updatedVideo = await Video.findByIdAndUpdate(
+    params.id,
+    { title, description },
+    {
+      new: true,
+    }
+  );
 
   return NextResponse.json(
     { message: "Video updated", video: updatedVideo },
