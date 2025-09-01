@@ -1,11 +1,20 @@
 import mongoose from "mongoose";
 
-const MongoDB_UI = process.env.MONGODB_URI!;
+const MONGODB_URI = process.env.MONGODB_URI as string;
 
-if (!MongoDB_UI) {
+if (!MONGODB_URI) {
   throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env.local"
+    "Please define the MONGODB_URI environment variable inside .env.local or Vercel"
   );
+}
+
+// Extend global type so we can cache the connection in dev
+declare global {
+  // eslint-disable-next-line no-var
+  var mongoose: {
+    conn: typeof import("mongoose") | null;
+    promise: Promise<typeof import("mongoose")> | null;
+  };
 }
 
 let cached = global.mongoose;
@@ -16,21 +25,26 @@ if (!cached) {
 
 export async function dbConnect() {
   if (cached.conn) {
-    console.log("Using existing database connection");
+    console.log("✅ Using existing database connection");
     return cached.conn;
   }
 
   if (!cached.promise) {
     cached.promise = mongoose
-      .connect(MongoDB_UI)
-      .then(() => mongoose.connection);
+      .connect(MONGODB_URI, {
+        dbName: "video", // 👈 make sure this matches your DB name
+        bufferCommands: false,
+      })
+      .then((mongoose) => mongoose);
   }
+
   try {
     cached.conn = await cached.promise;
-    console.log("New database connection created");
+    console.log("✅ New database connection created");
   } catch (error) {
     cached.promise = null;
-    console.log(error);
+    console.error("❌ MongoDB connection error:", error);
+    throw error;
   }
 
   return cached.conn;
