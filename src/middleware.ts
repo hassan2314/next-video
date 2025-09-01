@@ -28,7 +28,7 @@ export default withAuth(
           pathname === "/reset-password" ||
           pathname.startsWith("/videos/") ||
           pathname.startsWith("/channel/") ||
-          pathname === "api/test-db"
+          pathname.startsWith("/api/test-db")
         ) {
           return true;
         }
