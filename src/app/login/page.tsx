@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react"; // for eye icons
+import Image from "next/image";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -102,7 +103,13 @@ const LoginPage = () => {
           className="w-full py-2 border border-gray-300 rounded-lg flex justify-center items-center gap-2 hover:bg-gray-100 transition text-gray-500 hover:text-gray-800"
           onClick={() => signIn("google")}
         >
-          <img src="/Google_Icon.png" alt="Google" className="w-5 h-5" />
+          <img
+            src="/Google_Icon.png"
+            alt="Google"
+            width={20}
+            height={20}
+            className="w-5 h-5"
+          />
           Sign In with Google
         </button>
 
