@@ -32,7 +32,7 @@ export async function dbConnect() {
   if (!cached.promise) {
     cached.promise = mongoose
       .connect(MONGODB_URI, {
-        dbName: "video", // 👈 make sure this matches your DB name
+        dbName: "test", // 👈 make sure this matches your DB name
         bufferCommands: false,
       })
       .then((mongoose) => mongoose);
