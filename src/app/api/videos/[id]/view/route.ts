@@ -14,13 +14,15 @@ export async function POST(
       id,
       { $inc: { views: 1 } },
       { new: true }
-    ).lean();
+    )
+      .select("views")
+      .lean<{ views?: number }>();
 
     if (!video) {
       return NextResponse.json({ error: "Video not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ views: video.views || 0 }, { status: 200 });
+    return NextResponse.json({ views: video.views ?? 0 }, { status: 200 });
   } catch (error) {
     console.error("Error incrementing views:", error);
     return NextResponse.json(
