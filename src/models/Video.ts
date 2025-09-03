@@ -13,6 +13,7 @@ export interface IVideo {
     quality: number;
   };
   controls?: boolean;
+  views?: number;
   likes?: mongoose.Types.ObjectId[];
   dislikes?: mongoose.Types.ObjectId[];
   createdAt?: Date;
@@ -32,6 +33,7 @@ const videoSchema = new Schema<IVideo>(
       height: Number,
       quality: Number,
     },
+    views: { type: Number, default: 0 },
     likes: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     dislikes: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
   },
