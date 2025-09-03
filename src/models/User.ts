@@ -10,6 +10,8 @@ export interface IUser extends Document {
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
   provider: "credentials" | "google" | "github";
+  subscribers?: mongoose.Types.ObjectId[];
+  subscriptions?: mongoose.Types.ObjectId[];
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -27,6 +29,8 @@ const UserSchema = new Schema<IUser>(
     image: { type: String },
     resetPasswordToken: { type: String },
     resetPasswordExpire: { type: Date },
+    subscribers: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
+    subscriptions: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
   },
   { timestamps: true }
 );

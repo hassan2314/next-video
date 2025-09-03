@@ -29,6 +29,7 @@ interface Video {
   description: string;
   video: string;
   thumbnail: string;
+  views?: number;
   createdAt: string;
   owner?: User;
   likes?: string[];
@@ -47,6 +48,9 @@ export default function VideoPage() {
   const [dislikesCount, setDislikesCount] = useState(0);
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
+  const [views, setViews] = useState(0);
+  const [subscribersCount, setSubscribersCount] = useState(0);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -58,6 +62,9 @@ export default function VideoPage() {
         const data = await res.json();
         setVideo(data.video);
         setRelated(data.related);
+        setViews(data.views || 0);
+        setSubscribersCount(data.subscribersCount || 0);
+        setIsSubscribed(!!data.isSubscribed);
         setFormatedDate(
           new Date(data.video.createdAt).toLocaleDateString("en-US", {
             year: "numeric",
@@ -89,6 +96,24 @@ export default function VideoPage() {
     fetchVideo();
   }, [id, session?.user?.id]);
 
+  // Increment views when the page is viewed
+  useEffect(() => {
+    if (!id) return;
+    async function incrementViews() {
+      try {
+        const res = await fetch(`/api/videos/${id}/view`, { method: "POST" });
+        if (res.ok) {
+          const data = await res.json();
+          setViews(data.views ?? views);
+        }
+      } catch (err) {
+        console.error("Error incrementing views:", err);
+      }
+    }
+    incrementViews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
   async function handleLike() {
     if (!id) return;
     try {
@@ -116,6 +141,21 @@ export default function VideoPage() {
       setDislikesCount(data.dislikesCount ?? dislikesCount);
     } catch (err) {
       console.error("Error disliking video:", err);
+    }
+  }
+
+  async function handleSubscribe() {
+    if (!id || !video?.owner?._id) return;
+    try {
+      const res = await fetch(`/api/channel/${video.owner._id}/subscribe`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error("Failed to toggle subscription");
+      const data = await res.json();
+      setIsSubscribed(!!data.subscribed);
+      setSubscribersCount(data.subscribersCount ?? subscribersCount);
+    } catch (err) {
+      console.error("Error toggling subscription:", err);
     }
   }
 
@@ -197,7 +237,7 @@ export default function VideoPage() {
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
                 <div className="flex items-center gap-1">
                   <Play size={16} />
-                  <span>12K views</span>
+                  <span>{views.toLocaleString()} views</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar size={16} />
@@ -272,12 +312,23 @@ export default function VideoPage() {
                       <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
                         {video.owner.name}
                       </h3>
-                      <p className="text-sm text-gray-500">245K subscribers</p>
+                      <p className="text-sm text-gray-500">
+                        {subscribersCount.toLocaleString()} subscribers
+                      </p>
                     </div>
                   </Link>
 
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors text-sm font-medium">
-                    Subscribe
+                  <button
+                    onClick={handleSubscribe}
+                    disabled={!session}
+                    className={`px-4 py-2 rounded-full transition-colors text-sm font-medium ${
+                      isSubscribed
+                        ? "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                        : "bg-blue-600 text-white hover:bg-blue-700"
+                    } ${!session ? "opacity-50 cursor-not-allowed" : ""}`}
+                    aria-pressed={isSubscribed}
+                  >
+                    {isSubscribed ? "Subscribed" : "Subscribe"}
                   </button>
                 </div>
               )}
@@ -361,7 +412,7 @@ export default function VideoPage() {
 
                       <div className="flex items-center text-xs text-gray-500">
                         {/* You might want to add view count to your video model */}
-                        <span>0 views</span>
+                        <span>{v.views || 0} views</span>
                         <span className="mx-1">•</span>
                         <span>{relatedTimeAgo}</span>
                       </div>
