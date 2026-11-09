@@ -1,6 +1,7 @@
 import { dbConnect } from "@/lib/db";
 import { Video } from "@/models/Video";
 import { authOptions } from "@/lib/auth";
+import { isDemoClipId, toggleDemoLike } from "@/lib/demo-catalog";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
@@ -10,13 +11,19 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await dbConnect();
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await params;
+    if (isDemoClipId(id)) {
+      return NextResponse.json(toggleDemoLike(id, session.user.id), {
+        status: 200,
+      });
+    }
+
+    await dbConnect();
     const userId = session.user.id;
 
     const video = await Video.findById(id);

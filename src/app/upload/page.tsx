@@ -56,7 +56,7 @@ export default function UploadPage() {
         thumbnail: thumbnailUrl,
       });
 
-      if (res.status === 200) {
+      if (res.status >= 200 && res.status < 300) {
         setSuccess("🎉 Video uploaded successfully!");
         setTitle("");
         setDescription("");

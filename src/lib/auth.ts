@@ -5,19 +5,28 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { User } from "@/models/User";
 import { dbConnect } from "./db";
 
-export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
-  session: { strategy: "jwt" },
-  providers: [
+const providers: NextAuthOptions["providers"] = [];
+
+if (process.env.GOOGLE_ID && process.env.GOOGLE_SECRET) {
+  providers.push(
     GoogleProvider({
-      clientId: process.env.GOOGLE_ID!,
-      clientSecret: process.env.GOOGLE_SECRET!,
-    }),
+      clientId: process.env.GOOGLE_ID,
+      clientSecret: process.env.GOOGLE_SECRET,
+    })
+  );
+}
+
+if (process.env.GITHUB_ID && process.env.GITHUB_SECRET) {
+  providers.push(
     GithubProvider({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET!,
-    }),
-    CredentialsProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
+    })
+  );
+}
+
+providers.push(
+  CredentialsProvider({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
@@ -46,8 +55,13 @@ export const authOptions: NextAuthOptions = {
           image: user.image,
         };
       },
-    }),
-  ],
+    })
+);
+
+export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
+  session: { strategy: "jwt" },
+  providers,
   callbacks: {
     async signIn({ user, account }) {
       await dbConnect();

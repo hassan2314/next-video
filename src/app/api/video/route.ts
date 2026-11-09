@@ -1,4 +1,5 @@
 import { authOptions } from "@/lib/auth";
+import { getDemoVideos } from "@/lib/demo-catalog";
 import { dbConnect } from "@/lib/db";
 import { IVideo, Video } from "@/models/Video";
 import { getServerSession } from "next-auth";
@@ -6,20 +7,25 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
 export async function GET() {
-  try {
-    await dbConnect();
-    const videos = await Video.find({})
-      .sort({ createdAt: -1 })
-      .populate("owner", "name image")
-      .lean();
-    return NextResponse.json({ videos }, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+  if (process.env.MONGODB_URI) {
+    try {
+      await dbConnect();
+      const videos = await Video.find({})
+        .sort({ createdAt: -1 })
+        .populate("owner", "name image")
+        .lean();
+      if (videos.length > 0) {
+        return NextResponse.json({ videos }, { status: 200 });
+      }
+    } catch {
+      console.error("Video list failed; serving the sample catalog.");
+    }
   }
+
+  return NextResponse.json(
+    { videos: getDemoVideos(), demo: true },
+    { status: 200 }
+  );
 }
 
 export async function POST(req: Request) {

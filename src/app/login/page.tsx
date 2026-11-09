@@ -30,8 +30,14 @@ const LoginPage = () => {
     if (res?.error) {
       setError("Invalid email or password");
     } else {
-      // redirect to dashboard/home
-      router.push("/");
+      const callback = new URLSearchParams(window.location.search).get(
+        "callbackUrl"
+      );
+      const destination =
+        callback && callback.startsWith("/") && !callback.startsWith("//")
+          ? callback
+          : "/";
+      router.push(destination);
     }
   };
   return (
@@ -120,7 +126,7 @@ const LoginPage = () => {
 
         <p className="text-sm text-gray-500 text-center">
           Don’t have an account?{" "}
-          <Link className="text-blue-500 hover:underline" href="/signup">
+          <Link className="text-blue-500 hover:underline" href="/register">
             Sign Up
           </Link>
         </p>

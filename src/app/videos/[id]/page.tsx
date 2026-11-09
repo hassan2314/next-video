@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { timeAgo } from "@/utils/date";
+import { displayThumbnail } from "@/lib/media";
 import { useSession } from "next-auth/react";
 import {
   ThumbsUp,
@@ -215,7 +216,7 @@ export default function VideoPage() {
           <div className="relative w-full pb-[56.25%]">
             <video
               src={video.video}
-              poster={video.thumbnail}
+              poster={displayThumbnail(video.thumbnail)}
               controls
               preload="metadata"
               className="absolute top-0 left-0 w-full h-full object-contain"
@@ -300,7 +301,7 @@ export default function VideoPage() {
                   >
                     <div className="relative">
                       <img
-                        src={video.owner.image}
+                        src={video.owner.image || "/demo/avatar.svg"}
                         alt={video.owner.name}
                         width={48}
                         height={48}
@@ -364,11 +365,11 @@ export default function VideoPage() {
             {/* Comments section - placeholder */}
             <div className="bg-white rounded-xl shadow-sm p-6 mt-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                Comments (42)
+                Comments
               </h2>
               <div className="text-center py-8 text-gray-500">
                 <User size={40} className="mx-auto mb-3 text-gray-300" />
-                <p>Comments are disabled for this video.</p>
+                <p>Comments are not available yet.</p>
               </div>
             </div>
           </div>
@@ -392,7 +393,7 @@ export default function VideoPage() {
                   >
                     <div className="relative flex-shrink-0">
                       <img
-                        src={`${v.thumbnail}?tr=w-160,h-90,fo-auto`}
+                        src={displayThumbnail(v.thumbnail, "w-160,h-90,fo-auto")}
                         alt={v.title}
                         className="w-40 h-24 object-cover rounded-lg"
                       />

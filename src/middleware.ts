@@ -14,6 +14,9 @@ export default withAuth(
     return NextResponse.next();
   },
   {
+    pages: {
+      signIn: "/login",
+    },
     callbacks: {
       async authorized({ req, token }) {
         const { pathname } = req.nextUrl;
@@ -24,11 +27,23 @@ export default withAuth(
           pathname === "/login" ||
           pathname === "/register" ||
           pathname === "/" ||
+          pathname === "/about" ||
           pathname === "/forgot-password" ||
           pathname === "/reset-password" ||
           pathname.startsWith("/videos/") ||
           pathname.startsWith("/channel/") ||
-          pathname.startsWith("/api/test-db")
+          pathname.startsWith("/api/test-db") ||
+          pathname === "/opengraph-image" ||
+          pathname === "/icon" ||
+          pathname === "/apple-icon"
+        ) {
+          return true;
+        }
+
+        // Anyone watching a clip can record a view.
+        if (
+          req.method === "POST" &&
+          /^\/api\/videos\/[^/]+\/view$/.test(pathname)
         ) {
           return true;
         }
@@ -50,5 +65,7 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/data|public|favicon.ico).*)"],
+  matcher: [
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|mp4|webm)$).*)",
+  ],
 };
