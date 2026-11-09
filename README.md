@@ -1,206 +1,131 @@
-# Next Video - Video Sharing Platform
+# Next Video
 
-A modern video sharing platform built with Next.js 15, featuring user authentication, video upload, and channel management capabilities.
+Next Video is a small video-sharing app: a public gallery, a watch page, channels, and member uploads. Signed-out visitors can browse and play clips. Signed-in members can upload a video to their own channel.
+
+Live app: [https://next-video-rouge.vercel.app](https://next-video-rouge.vercel.app)
 
 ## Features
 
-- 🎥 **Video Upload & Streaming** - Upload and share videos with automatic thumbnail generation
-- 👤 **User Authentication** - Secure login/register with NextAuth.js supporting multiple providers
-- 🔐 **Multiple Auth Providers** - Support for credentials, Google, and GitHub authentication
-- 📱 **Responsive Design** - Modern UI built with Tailwind CSS
-- 🎬 **Channel System** - User channels for organizing and displaying videos
-- 🔒 **Protected Routes** - Secure API endpoints with middleware protection
-- 📧 **Password Reset** - Email-based password recovery system
-- 🎨 **Modern UI Components** - Built with Headless UI and Lucide React icons
+- Video gallery and watch page, with likes, views, and related clips
+- Email/password accounts, plus Google and GitHub when those providers are configured
+- Protected upload page and video APIs
+- Channel pages and subscribe
+- Password reset by email when mail credentials are set
+- Freely licensed sample clips when the database has no videos yet
 
-## Tech Stack
+## Stack
 
-- **Frontend**: Next.js 15, React 19, TypeScript
-- **Styling**: Tailwind CSS v4
-- **Authentication**: NextAuth.js
-- **Database**: MongoDB with Mongoose ODM
-- **Media Storage**: ImageKit for video and image handling
-- **Email**: Nodemailer for transactional emails
-- **Icons**: Lucide React
-- **Password Hashing**: bcryptjs
+Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 4, NextAuth, MongoDB with Mongoose, ImageKit for uploaded media, Nodemailer for password reset.
 
-## Getting Started
+## Architecture
 
-### Prerequisites
+The App Router UI and route handlers read and write MongoDB through Mongoose. NextAuth sessions gate uploads and edits, ImageKit stores files members upload, and an empty `videos` collection falls back to a built-in catalog of CC0 and Creative Commons clips.
 
-- Node.js 18+ 
-- MongoDB database
-- ImageKit account (for media storage)
+## Screenshots
 
-### Installation
+![Video gallery with sample clips](docs/screenshots/gallery.png)
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd next-video
-   ```
+![Video player](docs/screenshots/player.png)
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+![Sign-in page](docs/screenshots/sign-in.png)
 
-3. **Environment Setup**
-   Create a `.env.local` file in the root directory:
-   ```env
-   # Database
-   MONGODB_URI=your_mongodb_connection_string
-   
-   # NextAuth
-   NEXTAUTH_URL=http://localhost:3000
-   NEXTAUTH_SECRET=your_nextauth_secret
-   
-   # OAuth Providers (optional)
-   GOOGLE_CLIENT_ID=your_google_client_id
-   GOOGLE_CLIENT_SECRET=your_google_client_secret
-   GITHUB_CLIENT_ID=your_github_client_id
-   GITHUB_CLIENT_SECRET=your_github_client_secret
-   
-   # ImageKit
-   IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
-   IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
-   IMAGEKIT_URL_ENDPOINT=your_imagekit_url_endpoint
-   
-   # Email (for password reset)
-   EMAIL_FROM=your_email@example.com
-   EMAIL_SERVER_HOST=your_smtp_host
-   EMAIL_SERVER_PORT=587
-   EMAIL_SERVER_USER=your_smtp_username
-   EMAIL_SERVER_PASSWORD=your_smtp_password
-   ```
+## Setup
 
-4. **Run the development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router
-│   ├── api/               # API routes
-│   ├── login/             # Login page
-│   ├── register/          # Registration page
-│   ├── upload/            # Video upload page
-│   ├── videos/            # Video viewing pages
-│   ├── channel/           # Channel pages
-│   ├── forgot-password/   # Password recovery
-│   └── reset-password/    # Password reset
-├── components/            # Reusable UI components
-├── lib/                   # Utility libraries
-├── models/                # MongoDB/Mongoose models
-│   ├── User.ts           # User model
-│   └── Video.ts          # Video model
-├── types/                 # TypeScript type definitions
-├── utils/                 # Utility functions
-└── middleware.ts          # Route protection middleware
-```
-
-## API Routes
-
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/signin` - User login
-- `POST /api/auth/signout` - User logout
-
-### Videos
-- `GET /api/video` - Get all videos
-- `POST /api/video` - Upload new video (protected)
-- `GET /api/videos/[id]` - Get specific video
-- `PUT /api/videos/[id]` - Update video (protected)
-- `DELETE /api/videos/[id]` - Delete video (protected)
-
-### Channels
-- `GET /api/channel/[id]` - Get channel information and videos
-
-### User Management
-- `POST /api/forgot-password` - Request password reset
-- `POST /api/reset-password` - Reset password with token
-
-## Authentication Flow
-
-The application uses NextAuth.js with the following features:
-
-- **Multiple Providers**: Credentials, Google, GitHub
-- **Secure Sessions**: JWT-based authentication
-- **Route Protection**: Middleware-based route protection
-- **Password Recovery**: Email-based password reset system
-
-### Protected Routes
-
-- `/upload` - Video upload (requires authentication)
-- `/api/video` (POST) - Video creation (requires authentication)
-- Video management endpoints (requires ownership)
-
-### Public Routes
-
-- `/` - Home page (video gallery)
-- `/login` - Login page
-- `/register` - Registration page
-- `/videos/[id]` - Video viewing
-- `/channel/[id]` - Channel viewing
-
-## Video Upload Process
-
-1. **Authentication Check** - User must be logged in
-2. **File Upload** - Videos uploaded to ImageKit
-3. **Thumbnail Generation** - Automatic thumbnail creation
-4. **Database Storage** - Video metadata stored in MongoDB
-5. **Processing** - Optional video transformations via ImageKit
-
-## Deployment
-
-### Build for Production
+Requirements: Node.js 18 or newer, and a MongoDB database for accounts and uploads. The sample gallery works without MongoDB. Uploading a file also needs an [ImageKit](https://imagekit.io) account (free tier is enough; this project does not add a paid service).
 
 ```bash
-npm run build
-npm start
+git clone https://github.com/hassan2314/next-video.git
+cd next-video
+npm install
+cp .env.example .env.local
+# Fill in placeholders in .env.local. Never commit that file.
+npm run dev
 ```
 
-### Environment Variables
+Open [http://localhost:3000](http://localhost:3000).
 
-Ensure all required environment variables are set in your production environment:
+### Sample clips and the demo account
 
-- Database connection string
-- NextAuth configuration
-- ImageKit credentials
-- Email server settings
+If `MONGODB_URI` is missing, or the database has no videos, `GET /api/video` returns the built-in catalog. No API key is required for that path. The clips stay on their original hosts (MDN, Wikimedia Commons, Blender Foundation, and a short CC BY excerpt of Big Buck Bunny). Posters in `public/demo/` are single frames from those same clips.
 
-### Recommended Platforms
+To store the same clips in MongoDB and create a demo login:
 
-- **Vercel** - Seamless Next.js deployment
-- **Railway** - Full-stack deployment
-- **DigitalOcean App Platform** - Container-based deployment
+```bash
+npm run seed
+```
 
-## Contributing
+The script reads `MONGODB_URI` from the environment, `.env.local`, or `.env`. It only replaces videos owned by the demo account.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+| | |
+| --- | --- |
+| Email | `demo@nextvideo.example` |
+| Password | `demopassword` |
 
-## License
+Those credentials are fake on purpose. Do not reuse them anywhere else.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Re-running the seed resets that account’s password and replaces its videos.
 
-## Support
+### Sample clip licenses
 
-If you have any questions or need help, please:
+| Clip | License |
+| --- | --- |
+| Wildflowers | CC0, MDN `interactive-examples` (`media/cc0-videos/flower.mp4`) |
+| Blue Flowers | CC0, Zuzanna Musial, Wikimedia Commons |
+| Flower Moon | CC0, Roesalow, Wikimedia Commons |
+| Sintel trailer | CC BY 3.0, Blender Foundation, [sintel.org](https://durian.blender.org/) |
+| Big Buck Bunny (10 seconds) | CC BY 3.0, Blender Foundation, [peach.blender.org](https://peach.blender.org/) |
 
-1. Check the [issues](../../issues) for existing solutions
-2. Create a new issue for bug reports or feature requests
-3. Review the documentation for setup instructions
+## Environment variables
 
----
+Copy `.env.example`. Put real values only in `.env.local` or in the Vercel project. Do not commit secrets.
 
-Built with ❤️ using Next.js and modern web technologies.
+| Name | Required | Purpose |
+| --- | --- | --- |
+| `MONGODB_URI` | For accounts, uploads, and `npm run seed` | MongoDB connection string. The app uses the database named `test`. |
+| `NEXTAUTH_URL` | For sign-in | Site URL, e.g. `http://localhost:3000` or `https://next-video-rouge.vercel.app` |
+| `NEXTAUTH_SECRET` | For sign-in | Long random string (`openssl rand -base64 32`) |
+| `GOOGLE_ID`, `GOOGLE_SECRET` | No | Google sign-in. Omit both to skip that provider. |
+| `GITHUB_ID`, `GITHUB_SECRET` | No | GitHub sign-in. Omit both to skip that provider. |
+| `NEXT_PUBLIC_PUBLIC_KEY` | For file uploads | ImageKit public key |
+| `IMAGEKIT_PRIVATE_KEY` | For file uploads | ImageKit private key |
+| `NEXT_PUBLIC_URL_ENDPOINT` | For file uploads | ImageKit URL endpoint |
+| `EMAIL_USER`, `EMAIL_PASS` | No | Mail account used to send password-reset links |
+| `NEXT_PUBLIC_APP_URL` | No | Canonical URL for Open Graph tags. Defaults to the live Vercel URL. |
+
+The sample gallery does not need a new variable. Sign-up, sign-in, and the demo seed use the variables above, which this Vercel project already has. Nothing new has to be added in Vercel for the gallery or for auth.
+
+`NEXTAUTH_URL` on the Vercel project should be `https://next-video-rouge.vercel.app`. Set `NEXT_PUBLIC_APP_URL` only if that public URL changes.
+
+To create the demo account in the database the live app uses, pull the existing env (this does not add variables) and run the seed from a trusted machine:
+
+```bash
+vercel env pull .env.local
+npm run seed
+```
+
+`.env.local` is gitignored. Merging to `main` redeploys [https://next-video-rouge.vercel.app](https://next-video-rouge.vercel.app). This repo does not use a second Vercel project.
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Next.js dev server |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npm run seed` | Create the demo account and sample videos |
+
+## Project layout
+
+```
+src/app/            App Router pages and route handlers
+src/components/     Navbar, upload widgets, auth provider
+src/lib/            Database, NextAuth, sample catalog
+src/models/         User and Video
+scripts/seed-demo.ts
+public/demo/        Posters and the sample channel avatar
+```
+
+Public pages: `/`, `/login`, `/register`, `/videos/[id]`, `/channel/[id]`, `/about`, `/forgot-password`, `/reset-password`.
+
+Signed-in pages: `/upload`, and editing or deleting a video you own.

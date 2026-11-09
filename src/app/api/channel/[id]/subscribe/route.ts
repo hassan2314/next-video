@@ -1,6 +1,10 @@
 import { dbConnect } from "@/lib/db";
 import { User } from "@/models/User";
 import { authOptions } from "@/lib/auth";
+import {
+  isDemoChannelId,
+  toggleDemoSubscription,
+} from "@/lib/demo-catalog";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
@@ -10,7 +14,6 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await dbConnect();
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,6 +21,14 @@ export async function POST(
 
     const { id } = await params; // channel owner id
     const viewerId = session.user.id;
+
+    if (isDemoChannelId(id)) {
+      return NextResponse.json(toggleDemoSubscription(viewerId), {
+        status: 200,
+      });
+    }
+
+    await dbConnect();
 
     if (viewerId === id) {
       return NextResponse.json(

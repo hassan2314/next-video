@@ -1,7 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { Play } from "lucide-react";
 import { timeAgo } from "@/utils/date";
+import { displayThumbnail } from "@/lib/media";
 
 interface Video {
   _id: string;
@@ -21,6 +23,7 @@ export default function HomePage() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [demo, setDemo] = useState(false);
 
   useEffect(() => {
     async function fetchVideos() {
@@ -34,6 +37,7 @@ export default function HomePage() {
         }
 
         setVideos(data.videos);
+        setDemo(Boolean(data.demo));
       } catch (err: unknown) {
         console.error("Error fetching videos:", err);
 
@@ -62,6 +66,13 @@ export default function HomePage() {
         </Link>
       </div>
 
+      {demo && !loading && !error && (
+        <p className="px-4 pb-2 text-sm text-gray-600">
+          Sample clips from CC0 and Creative Commons sources. Sign in to upload
+          your own.
+        </p>
+      )}
+
       {/* Error State */}
       {error && (
         <div className="p-4 text-center">
@@ -81,15 +92,24 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
           {videos.length > 0 ? (
             videos.map((video) => (
-              <Link key={video._id} href={`/videos/${video._id}`}>
-                <div className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition bg-white">
-                  <video
-                    src={video.video}
-                    poster={video.thumbnail}
-                    controls
-                    className="w-full h-48 object-cover bg-black"
-                  />
-                  <div className="p-3">
+              <article
+                key={video._id}
+                className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition bg-white"
+              >
+                <Link href={`/videos/${video._id}`} className="block">
+                  <div className="relative">
+                    <img
+                      src={displayThumbnail(video.thumbnail)}
+                      alt=""
+                      className="w-full h-48 object-cover bg-black"
+                    />
+                    <span className="absolute inset-0 flex items-center justify-center">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black/60 text-white">
+                        <Play size={22} className="ml-0.5" fill="currentColor" />
+                      </span>
+                    </span>
+                  </div>
+                  <div className="p-3 pb-2">
                     <h2 className="text-lg font-semibold text-gray-800">
                       {video.title}
                     </h2>
@@ -103,29 +123,28 @@ export default function HomePage() {
                         {timeAgo(new Date(video.createdAt))}
                       </p>
                     )}
-                    {/* Owner info */}
-                    {video.owner && (
-                      <div className="flex items-center gap-2 mt-4">
-                        <Link
-                          href={`/channel/${video.owner._id}`}
-                          className="flex items-center gap-2 hover:opacity-80"
-                        >
-                          <img
-                            src={video.owner.image}
-                            alt={video.owner.name}
-                            width={40}
-                            height={40}
-                            className="rounded-full object-cover"
-                          />
-                          <span className="font-medium text-1xl text-gray-800">
-                            {video.owner.name}
-                          </span>
-                        </Link>
-                      </div>
-                    )}
                   </div>
-                </div>
-              </Link>
+                </Link>
+                {video.owner && (
+                  <div className="px-3 pb-3">
+                    <Link
+                      href={`/channel/${video.owner._id}`}
+                      className="flex items-center gap-2 hover:opacity-80"
+                    >
+                      <img
+                        src={video.owner.image || "/demo/avatar.svg"}
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-full object-cover bg-blue-600"
+                      />
+                      <span className="font-medium text-gray-800">
+                        {video.owner.name}
+                      </span>
+                    </Link>
+                  </div>
+                )}
+              </article>
             ))
           ) : (
             <p className="col-span-full text-center text-gray-500">

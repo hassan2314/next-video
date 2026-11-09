@@ -23,7 +23,11 @@ export async function POST(req: NextRequest) {
       image: image || null,
     });
 
-    return NextResponse.json(user);
+    return NextResponse.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    });
   } catch (error) {
     console.log(error);
     return NextResponse.json(

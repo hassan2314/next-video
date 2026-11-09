@@ -14,7 +14,7 @@ const Navbar = () => {
 
   const links = [
     { href: "/", label: "Home" },
-    { href: "/videos", label: "Videos" },
+    { href: "/upload", label: "Upload" },
     { href: "/about", label: "About" },
   ];
 
@@ -23,7 +23,7 @@ const Navbar = () => {
       <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo */}
         <Link href="/" className="text-2xl font-bold text-blue-600">
-          MyVideoApp
+          Next Video
         </Link>
 
         {/* Desktop Links */}
@@ -64,7 +64,6 @@ const Navbar = () => {
                   </span>
                 )}
               </button>
-              {console.log(session)}
               {/* Dropdown */}
               {dropdownOpen && (
                 <div className="absolute right-0 top-10 w-40 bg-white border border-gray-200 shadow-lg rounded-md">

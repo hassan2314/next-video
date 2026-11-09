@@ -2,25 +2,52 @@ import { dbConnect } from "@/lib/db";
 import { Video } from "@/models/Video";
 import { User } from "@/models/User";
 import { authOptions } from "@/lib/auth";
+import {
+  demoSubscriberCount,
+  getDemoVideo,
+  getDemoVideos,
+  isDemoClipId,
+  isDemoSubscribed,
+} from "@/lib/demo-catalog";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import ImageKit from "imagekit";
 
-const imagekit = new ImageKit({
-  publicKey: process.env.NEXT_PUBLIC_PUBLIC_KEY!,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
-  urlEndpoint: process.env.NEXT_PUBLIC_URL_ENDPOINT!,
-});
+function getImageKit() {
+  return new ImageKit({
+    publicKey: process.env.NEXT_PUBLIC_PUBLIC_KEY || "",
+    privateKey: process.env.IMAGEKIT_PRIVATE_KEY || "",
+    urlEndpoint: process.env.NEXT_PUBLIC_URL_ENDPOINT || "",
+  });
+}
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await dbConnect();
-
-    // Await the params since they're now a Promise
     const { id } = await params;
+
+    if (isDemoClipId(id)) {
+      const video = getDemoVideo(id);
+      if (!video) {
+        return NextResponse.json({ error: "Video not found" }, { status: 404 });
+      }
+      const session = await getServerSession(authOptions).catch(() => null);
+      const userId = session?.user?.id;
+      return NextResponse.json(
+        {
+          video,
+          related: getDemoVideos().filter((item) => item._id !== id),
+          views: video.views,
+          subscribersCount: demoSubscriberCount(),
+          isSubscribed: userId ? isDemoSubscribed(userId) : false,
+        },
+        { status: 200 }
+      );
+    }
+
+    await dbConnect();
 
     const video = await Video.findById(id)
       .populate("owner", "name image email")
@@ -77,11 +104,15 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await dbConnect();
-    console.log("Updating video...");
-
-    // Await the params since they're now a Promise
     const { id } = await params;
+    if (isDemoClipId(id)) {
+      return NextResponse.json(
+        { error: "Sample clips can't be edited" },
+        { status: 403 }
+      );
+    }
+
+    await dbConnect();
 
     const session = await getServerSession(authOptions);
     console.log("Session : ", session);
@@ -124,10 +155,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await dbConnect();
-
-    // Await the params since they're now a Promise
     const { id } = await params;
+    if (isDemoClipId(id)) {
+      return NextResponse.json(
+        { error: "Sample clips can't be deleted" },
+        { status: 403 }
+      );
+    }
+
+    await dbConnect();
 
     const session = await getServerSession(authOptions);
     if (!session)
@@ -150,6 +186,7 @@ export async function DELETE(
 
     // Keep your ImageKit cleanup
     try {
+      const imagekit = getImageKit();
       if (video.videoFileId) await imagekit.deleteFile(video.videoFileId);
       if (video.thumbnailFileId)
         await imagekit.deleteFile(video.thumbnailFileId);
